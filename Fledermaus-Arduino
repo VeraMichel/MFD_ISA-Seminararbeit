@@ -1,0 +1,135 @@
+
+/*Bibliotheken und anfängliche Eingaben von Distanzmesser & Lautsprecher*/ 
+    #include "Ultrasonic.h"
+    #define SPEAKER 3
+    Ultrasonic ultrasonic(7);
+    int BassTab[]={1911};//bass 1~7
+
+/*Bibliotheken und anfängliche Eingaben von Herzsensor & LED-Lampe*/ 
+    unsigned char counter;
+    unsigned long temp[21];
+    unsigned long sub;
+    bool data_effect=true;
+    unsigned int heart_rate;//the measurement result of heart rate
+
+    const int max_heartpluse_duty = 2000;//you can change it follow your system's request.
+                            //2000 meams 2 seconds. System return error 
+                            //if the duty overtrip 2 second.
+
+/*Funktionen von Distanzmesser & Lautsprecher*/ 
+    void sound(uint8_t note_index)
+    {
+       for(int i=0;i<100;i++) 
+    {
+        digitalWrite(SPEAKER,HIGH);
+        delayMicroseconds(BassTab[note_index]);
+        digitalWrite(SPEAKER,LOW);
+        delayMicroseconds(BassTab[note_index]);
+    }
+    }
+
+    void pinInit()
+    {
+      pinMode(SPEAKER,OUTPUT);
+      digitalWrite(SPEAKER,LOW);
+    }
+
+/*Funktionen von Herzsensor & LED-Lampe*/
+    void arrayInit()
+    {
+        for(unsigned char i=0;i < 20;i ++)
+        {
+            temp[i]=0;
+        }
+        temp[20]=millis();
+    }
+
+    void interrupt()
+    {
+        temp[counter]=millis();
+        Serial.println(counter,DEC);
+        Serial.println(temp[counter]);
+        switch(counter)
+        {
+            case 0:
+                sub=temp[counter]-temp[20];
+                Serial.println(sub);
+                break;
+            default:
+                sub=temp[counter]-temp[counter-1];
+                Serial.println(sub);
+                break;
+        }
+        if(sub>max_heartpluse_duty)//set 2 seconds as max heart pluse duty
+        {
+            data_effect=0;//sign bit
+            counter=0;
+            Serial.println("Heart rate measure error,test will restart!" );
+            arrayInit();
+        }
+        if (counter==20&&data_effect)
+        {
+            counter=0;
+            sum();
+        }
+        else if(counter!=20&&data_effect)
+        counter++;
+        else 
+        {
+            counter=0;
+            data_effect=1;
+        }
+
+    }
+
+    void sum()
+    {
+     if(data_effect)
+        {
+          heart_rate=1200000/(temp[20]-temp[0]);//60*20*1000/20_total_time 
+          Serial.print("Heart_rate_is:\t");
+          Serial.println(heart_rate);
+        }
+       data_effect=1;//sign bit
+    }
+    
+    void setup()
+    {   /*Initialisation von Distanzsensor & Lautsprecher*/
+        Serial.begin(9600);
+        pinInit();
+
+        /*Initialisation von Herzsensor & LED-Lampe*/
+        pinMode(8, OUTPUT);
+        Serial.begin(9600);
+        Serial.println("Please ready your chest belt.");
+        delay(5000);
+        arrayInit();
+        Serial.println("Heart rate test begin.");
+        attachInterrupt(0, interrupt, RISING);//set interrupt 0,digital port 2
+        }
+    
+    void loop()
+        { /*Loop von Distanzsensor & Lautsprecher*/
+         long RangeInCentimeters;
+  
+         RangeInCentimeters = ultrasonic.MeasureInCentimeters(); // two measurements should keep an interval
+         Serial.print(RangeInCentimeters);//0~400cm
+         Serial.println(" cm");
+         delay(250);
+        /*Bedingende IF-Abfrage, damit der Lautsprecher agiert von Distanzsensor & Lautsprecher*/
+        if (RangeInCentimeters <= 20)
+        /*sound bass 1~7*/
+         {for(int note_index=0;note_index<1;note_index++)
+        {
+        sound(note_index);
+        delay(500);
+        }}
+
+/*Bedingende IF-Abfrage, damit die LED-Lampe agiert von Herzsensor & LED-Lampe*/
+        if (heart_rate >70){
+        digitalWrite(8, HIGH);   // turn the LED on (HIGH is the voltage level)
+        delay(1000);                       // wait for a second
+        digitalWrite(8, LOW);    // turn the LED off by making the voltage LOW
+        delay(1000);                       // wait for a second
+        }
+    }
