@@ -116,7 +116,8 @@
          Serial.print(RangeInCentimeters);//0~400cm
          Serial.println(" cm");
          delay(250);
-        /*Bedingende IF-Abfrage, damit der Lautsprecher agiert von Distanzsensor & Lautsprecher*/
+         
+/*Bedingende IF-Abfrage, damit der Lautsprecher agiert von Distanzsensor & Lautsprecher*/
         if (RangeInCentimeters <= 20)
         /*sound bass 1~7*/
          {for(int note_index=0;note_index<1;note_index++)
