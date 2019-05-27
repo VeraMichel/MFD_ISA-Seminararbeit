@@ -9,7 +9,7 @@ Für diese Arbeit wurde eine Arduinoplattform mit jeweils zwei Aktoren und zwei 
 * Grove - Ultrasonic Ranger - Code für den Sensor [http://wiki.seeedstudio.com/Grove-Ultrasonic_Ranger/]
 * Fledermaus-Arduino - Zusammenschnitt der Codes mit eigener Arbeit
 
-## Authors
+## Autoren
 
 * **Peter Rigert** - *Student HSLU* - Fachdidaktik Medien und Informatik
 * **Vera Michel** - *Studentin HSLU* - Fachdidaktik Medien und Informatik
